@@ -10,3 +10,6 @@ class ServerBenchmark(unittest.TestCase):
 
     def test_mixed_random_10000_requests(self):
         pass
+
+if __name__ == '__main__':
+    unittest.main()
