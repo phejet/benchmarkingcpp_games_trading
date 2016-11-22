@@ -1,0 +1,120 @@
+Req materials:
+
+Talk structure:
+
+30 minutes total
+
+* 1 min intro about myself
+	( background and experience )
+* 1 min intro about domain area
+	( HFT trading, request processing, dedicated linux boxes, fixed HW, perf directly translates to money, no consistent load, bursts, latency is the king )
+* 2 min overview of the talk
+	( tracing in prod, time series db, tracing in speed lab env, reproducible benchmarks in speed lab env, how to measure stuff which takes less than 1 us )
+	not talking about micro benchmarking, perf, staring at assembly etc.
+	Instead, talking about high level performance analysis and benchmarking. Lightweight tracing, visualising patterns, recognizing patterns.
+* 1 min the most important thing in this talk
+	TODO: Summarize this in one sentence
+
+* 5 min talk about application under test
+
+Simple open source request processing application. Use as much third-party stuff as possible.
+Cmake as a build system
+
+Q: Skip protocol stuff for now, just pass a single string via TCP connection as a request and send a simple string as a reply ?
+A: No, use a very simple fixed schema and compare perf schema v1 vs schema v2
+
+Probably won't have enough time to do performance comparisions.
+With fizzbuzz, I can just replace packet handling logic and compare performance. This would be simpler to do and explain.
+
+It makes sense to run a simulated network server for demo purposes, I won't be demoing/talking about network specifics anyway.
+
+
+schema v1
+|........|....|.......    ......|
+request
+|00000001|0008|abcdefgh
+reply
+|00000001|0008|bcdefghj
+
+schema v2
+|........|....|.......    ......|
+|uint64_t|uint32_t|.......    ......|
+request
+|00000001|0008|abcdefgh
+reply
+|00000001|0008|bcdefghj
+
+
+homework:
+
+schema v3 : protobuf
+schema v4: capnpronto
+
+During presentation show:
+
+How perf diffs betweek schema v1 and schema v2
+Using both basic stats, histograms and timeline view
+
+
+Here is what application needs to do
+1. Simple TCP server to listen on incoming TCP connection and establish outgoing TCP connection.
+2. Listen on socket and receive data when it's available
+3. Parse packet ( simple text protocol )
+4. Process packet. Just some random work like using some fields to calculate values for the output packet. Can show how cache misses affect performance
+5. Serialise output packet ( simple text protocol, same message as request)
+6. Send packet.
+7. Go to 3 if have more packets to process, otherwise go to 2
+
+* 5 min talk about test harness and overall test setup
+
+Test harness is 1 python client app and pyunittest.
+mock client app is connecting to the application under test and sends packets in a controlled manner.
+Different tests to send different types of packets or different mixes.
+Think about the case when need to compare two binaries to do regression comparison.
+Another test is to play 'captured production traffic' into socket. See if I can re-use any existing solutions to do it. Sounds like a common task
+Another part of the harness is something listening on a specific port. Can use netcat to do this.
+Test harness needs to do core isolation on the application under test + isolate logging thread if I end up using it.
+
+Test itself is a pyunittest which runs benchmark, parses log and prints basic statistics. Can use Pycharm community edition for development.
+
+5 min talk about how timings are captured and how noise affects things.
+
+Can either accumulate captured TSC and dump them on sigterm or use a separate logging thread + lock free queue.
+Second option is much more complex, but closer to the reality.
+For simplicity reasons it would be better to go with accumulating data in memory and dumping log file on sigterm.
+
+For basic profiling need to capture TSCs + names of timestamps + index of the request.
+Look into capturing number of retired instructions + cache utilization.
+https://software.intel.com/en-us/articles/intel-performance-counter-monitor#calling_pcm
+
+* 1 min the most important thing in this talk
+	TODO: Summarize this in one sentence
+
+* 10 min show how the whole thing works and how output looks
+
+Show how test harness parses log output and prints basic statistics to provide immediate feedback.
+Alternative analysis is jupiter notebook, uses the same parser.
+Outputs histograms and can do much more complex analysis, finding outliers, filtering, analysing latency tail etc
+Show tail when application doing memory allocations
+	Could be a case when input string in proto buf is too big for small string opimisation and trigger memory alloc
+
+Alternative analysis is a timeview, use chrome tracing for this
+Can trigger it from the jupiter notebook.Simplest case would be to generate json file
+	Think of a good use case to show why time view is useful.
+	Detect clusters in jupiter and visualise clusters in the timeline !
+
+* 1 min the most important thing in this talk
+	TODO: Summarize this in one sentence
+
+* 4 min wrap it up and summarize what I've talked about
+	Lightweight tracing, visualising patterns, recognizing patterns.
+	Basically what do you do, before you fire up a profiler and start digging into that specific function.
+
+Bonus material:
+
+Alternative visual analysis is flame graphs.
+	http://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html
+	Think of a use case to show why flame graphs are useful.
+Alternative visual analysis is X-Ray in Clang 4.0
+
+
