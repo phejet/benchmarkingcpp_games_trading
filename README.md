@@ -1,7 +1,13 @@
-Use ROT1 cipher as a processing example
+*Low latency FizzBuzz !*
 
-Later can extend to support multiple types of ciphers
-ROT1
-Morse
-Caesar cipher
+Demo application for SydneyCpp meetup https://www.meetup.com/SydneyCPlusPlusMeetup/events/235456631/
 
+
+Application runs FizzBuzz game on a simulated network data and outputs tracing stats for performance analysis.
+
+To build
+
+mkdir build
+cd build
+cmake ../
+make
