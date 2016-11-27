@@ -14,16 +14,15 @@ int main(int argc, char *argv[])
 {
     if (argc < 2)
     {
-		printf("Usage:\n\t server port_number\n");
-		printf("Please provide port to listen on\n");
+		printf("Usage:\n\t fizzbuzz_server simulation file\n");
+		printf("Please simulation data file on\n");
 		return 0;
     }
 
-    int port = atoi(argv[1]);
-	printf("Running FizzBuzz server on %d port...\n", port);
-
+    const char* simulationFile = argv[1];
+	
 	Demo::Application app;
-	app.SimulationRun();
+	app.SimulationRun(simulationFile);
 
 	return 0;
 }

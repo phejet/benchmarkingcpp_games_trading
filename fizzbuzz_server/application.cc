@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <string>
 #include <random>
+#include <fstream>
 
 namespace Demo {
 
@@ -49,7 +50,7 @@ Application::~Application()
 
 void Application::HandleRequest(const char* recvBuf, size_t recvSize, IConnection* conn)
 {
-	TimeCapture timeCapture(mTimingLog);			// <--- START PROCESSING TS
+	TimeCapture timeCapture(mTimingLog);		// <--- START PROCESSING TS
 	uint64_t number = ReadInt<uint64_t>(recvBuf, recvSize);
 	timeCapture.CaptureFinishParsingTSC();		// <--- FINISH PARSING TS
 
@@ -64,13 +65,23 @@ void Application::HandleRequest(const char* recvBuf, size_t recvSize, IConnectio
 
 
 
-void Application::Run(int port)
+void Application::SimulationRun(const char* simulationFile)
 {
+	std::vector<SimulatedNetworkPacket> packets;
+	packets.reserve(1024);
 
-}
-
-void Application::SimulationRun()
-{
+	std::ifstream infile(simulationFile);
+	if (infile)
+	{
+		std::string number;
+		int delayNs = 0;
+		while (infile >> number >> delayNs)
+		{
+			packets.emplace_back(number, delayNs);
+		}
+		infile.close();
+	}
+	/*
 	// simulate network load for testing purposes
 	std::vector<SimulatedNetworkPacket> packets;
 	std::mt19937 randomGen(42); // fix seed
@@ -80,7 +91,7 @@ void Application::SimulationRun()
 	for (size_t i = 1; i < 1000; i++)
 	{
 		packets.emplace_back(std::to_string(i), delayDis(randomGen));
-	}
+	}*/
 
 	mSimServer.Run(packets, this);
 }

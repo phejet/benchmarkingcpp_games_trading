@@ -20,10 +20,11 @@ uint64_t TimeLog::ToEpoch(uint64_t tsc)
 void TimeLog::DumpLog()
 {
 	// dump profiling output to server_profiling.log
-	auto f = fopen("server_programming.log", "w+");
+	auto f = fopen("fizzbuzz_timings.log", "w+");
+	fprintf(f, "Header: TimeLogEntry: request=uint64,startTS=timestamp,finishParsingTS=timestamp,finishProcessingTS=timestamp,finishSendTS=timestamp\n");
 	for (auto& entry : mEntries)
 	{
-		fprintf(f, "TimeLogEntry: request=%llu,start=%llu,finishParsingTSC=%llu,finishProcessingTSC=%llu,finishSendTSS=%llu\n",
+		fprintf(f, "Data: TimeLogEntry: request=%llu,startTS=%llu,finishParsingTS=%llu,finishProcessingTS=%llu,finishSendTS=%llu\n",
 			entry.request, ToEpoch(entry.start), ToEpoch(entry.finishParsingTSC),
 			ToEpoch(entry.finishProcessingTSC), ToEpoch(entry.finishSendTSS));
 	}

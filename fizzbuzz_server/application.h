@@ -12,8 +12,7 @@ public:
 	Application() {}
 	~Application();
 
-	void Run(int port);
-	void SimulationRun();
+	void SimulationRun(const char* simulationFile);
 
 	void HandleRequest(const char* recvBuf, size_t recvSize, IConnection* conn) override;
 

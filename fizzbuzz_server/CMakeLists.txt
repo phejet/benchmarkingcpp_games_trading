@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-set(MODULE_NAME server)
+set(MODULE_NAME fizzbuzz_server)
 project(${MODULE_NAME})
 
 if (WIN32)
@@ -10,7 +10,7 @@ endif()
 set(FILES 
     application.h
     application.cc
-    server_main.cc
+    fizzbuzz_server_main.cc
     network.h
     network.cc
     timing.h
