@@ -13,11 +13,14 @@ SYS_TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 BINARY_NAME = 'fizzbuzz_server'
 WORKSPACE_NAME = 'workspace'
 if IS_WINDOWS:
-    BINARY_NAME += '.exe'
+    BINARY_EXT = '.exe'
+
 
 TIMINGS_LOG = 'fizzbuzz_timings.log'
 
-FULL_BINARY_PATH = os.path.join(SYS_TEST_DIR, '..', 'build', 'Release', BINARY_NAME)
+if IS_WINDOWS:
+    FULL_BINARY_PATH = os.path.join(SYS_TEST_DIR, '..', 'build', 'release', BINARY_NAME, 'Release', BINARY_NAME + BINARY_EXT)
+
 SIMULATION_FILENAME = 'simulation_data.txt'
 random.seed(42)
 
@@ -52,10 +55,10 @@ class FizzBuzzServerBenchmark(unittest.TestCase):
             l = len(v)
             mean = v[l / 2]
             sample_stddev = sqrt(sum([(x - mean) ** 2 for x in v]) / (l - 1))
-            print '\033[93m{:>10}\033[0m{:>14}{:>18}{:>22}{:>24}{:>26}{:>28}{:>30}'.format(
+            print '{:>10}{:>11}{:>12}{:>13}{:>14}{:>15}{:>16}{:>17}'.format(
                 name, v[int(l * 0.25)], v[int(l * 0.5)], v[int(l * 0.75)], v[int(l * 0.9)], v[int(l * 0.99)], v[int(l * 0.999)], '%.2f' % sample_stddev)
 
-        print '\033[91m{:>10}{:>14}{:>18}{:>22}{:>24}{:>26}{:>28}{:>30}\033[0m'.format('Name', '25%', '50%', '75%', '90%', '99%', '99.9%', 'stddev')
+        print '{:>10}{:>11}{:>12}{:>13}{:>14}{:>15}{:>16}{:>17}'.format('Name', '25%', '50%', '75%', '90%', '99%', '99.9%', 'stddev')
         _print_percentiles('Parsing', dur['Parsing'])
         _print_percentiles('Processing', dur['Processing'])
         _print_percentiles('Send', dur['Send'])
@@ -119,9 +122,11 @@ class FizzBuzzServerBenchmark(unittest.TestCase):
         # generate test data
         NUM_REQUESTS = 100000
 
+        file = ''
+        for i in range(NUM_REQUESTS):
+            file += '%d %d\n' % (random.randint(1000, 1000000), random.randint(0, 100))
         with open(os.path.join(self.workspace_dir, SIMULATION_FILENAME), 'w') as f:
-            for i in range(NUM_REQUESTS):
-                f.write('%d %d\n' % (random.randint(1000, 1000000), random.randint(0, 100)))
+            f.write(file)
 
         self._run_benchmark()
 
