@@ -56,12 +56,12 @@ class FizzBuzzServerBenchmark(unittest.TestCase):
 
         def _percentiles(name, v):
             l = len(v)
-            mean = v[l / 2]
-            sample_stddev = sqrt(sum([(x - mean) ** 2 for x in v]) / (l - 1))
-            return '{:>10}{:>11}{:>12}{:>13}{:>14}{:>15}{:>16}{:>17}{:>18}'.format(
-                name, sum(v) / l, v[int(l * 0.25)], v[int(l * 0.5)], v[int(l * 0.75)], v[int(l * 0.9)], v[int(l * 0.99)], v[int(l * 0.999)], '%.2f' % sample_stddev)
+            mean = sum(v) / l
+            stddev = sqrt(sum([(x - mean) ** 2 for x in v]) / (l - 1))
+            return '{:>10}{:>11}{:>12}{:>13}{:>14}{:>15}{:>16}{:>17}{:>18}{:>19}'.format(
+                name, mean, v[int(l * 0.25)], v[int(l * 0.5)], v[int(l * 0.75)], v[int(l * 0.9)], v[int(l * 0.99)], v[int(l * 0.999)], max(v), '%.2f' % stddev)
 
-        print Color.HEADER + '{:>10}{:>11}{:>12}{:>13}{:>14}{:>15}{:>16}{:>17}{:>18}'.format('Name', 'avg', '25%', '50%', '75%', '90%', '99%', '99.9%', 'stddev') + Color.ENDC
+        print Color.HEADER + '{:>10}{:>11}{:>12}{:>13}{:>14}{:>15}{:>16}{:>17}{:>18}{:>19}'.format('Name', 'avg', '25%', '50%', '75%', '90%', '99%', '99.9%', 'max', 'stddev') + Color.ENDC
         print _percentiles('Parsing', dur['Parsing'])
         print _percentiles('Processing', dur['Processing'])
         print _percentiles('Send', dur['Send'])
