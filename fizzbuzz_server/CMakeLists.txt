@@ -10,7 +10,7 @@ endif()
 set(FILES 
     application.h
     application.cc
-    fizzbuzz_server_main.cc
+    main.cc
     network.h
     network.cc
     timing.h

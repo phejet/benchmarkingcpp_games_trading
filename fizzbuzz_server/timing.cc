@@ -24,7 +24,7 @@ void TimeLog::DumpLog()
 	fprintf(f, "Header: TimeLogEntry: request=uint64,startTS=timestamp,finishParsingTS=timestamp,finishProcessingTS=timestamp,finishSendTS=timestamp\n");
 	for (auto& entry : mEntries)
 	{
-		fprintf(f, "Data: TimeLogEntry: request=%llu,startTS=%llu,finishParsingTS=%llu,finishProcessingTS=%llu,finishSendTS=%llu\n",
+		fprintf(f, "Data: TimeLogEntry: request=%lu,startTS=%lu,finishParsingTS=%lu,finishProcessingTS=%lu,finishSendTS=%lu\n",
 			entry.request, ToEpoch(entry.start), ToEpoch(entry.finishParsingTSC),
 			ToEpoch(entry.finishProcessingTSC), ToEpoch(entry.finishSendTSS));
 	}

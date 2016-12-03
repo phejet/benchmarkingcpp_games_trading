@@ -19,7 +19,10 @@ if IS_WINDOWS:
 TIMINGS_LOG = 'fizzbuzz_timings.log'
 
 if IS_WINDOWS:
-    FULL_BINARY_PATH = os.path.join(SYS_TEST_DIR, '..', 'build', 'release', BINARY_NAME, 'Release', BINARY_NAME + BINARY_EXT)
+    FULL_BINARY_PATH = os.path.join(SYS_TEST_DIR, '..', 'build', BINARY_NAME, 'Release', BINARY_NAME + BINARY_EXT)
+else:
+    FULL_BINARY_PATH = os.path.join(SYS_TEST_DIR, '..', 'build', 'release', BINARY_NAME, BINARY_NAME)
+
 
 SIMULATION_FILENAME = 'simulation_data.txt'
 random.seed(42)
@@ -41,7 +44,7 @@ class FizzBuzzServerBenchmark(unittest.TestCase):
             subprocess.call(['mklink', link, os.path.abspath(target)],
                              stdout=subprocess.PIPE, shell=True)
         else:
-            raise NotImplementedError()
+            os.symlink(os.path.abspath(target), link)
 
     def _print_stats(self, entries):
         dur = {}
@@ -51,18 +54,18 @@ class FizzBuzzServerBenchmark(unittest.TestCase):
         dur['Send'] = sorted(map(sub, entries['finishSendTS'], entries['finishProcessingTS'])[10:])
         dur['Total'] = sorted(map(sub, entries['finishSendTS'], entries['startTS'])[10:])
 
-        def _print_percentiles(name, v):
+        def _percentiles(name, v):
             l = len(v)
             mean = v[l / 2]
             sample_stddev = sqrt(sum([(x - mean) ** 2 for x in v]) / (l - 1))
-            print '{:>10}{:>11}{:>12}{:>13}{:>14}{:>15}{:>16}{:>17}'.format(
-                name, v[int(l * 0.25)], v[int(l * 0.5)], v[int(l * 0.75)], v[int(l * 0.9)], v[int(l * 0.99)], v[int(l * 0.999)], '%.2f' % sample_stddev)
+            return '{:>10}{:>11}{:>12}{:>13}{:>14}{:>15}{:>16}{:>17}{:>18}'.format(
+                name, sum(v) / l, v[int(l * 0.25)], v[int(l * 0.5)], v[int(l * 0.75)], v[int(l * 0.9)], v[int(l * 0.99)], v[int(l * 0.999)], '%.2f' % sample_stddev)
 
-        print '{:>10}{:>11}{:>12}{:>13}{:>14}{:>15}{:>16}{:>17}'.format('Name', '25%', '50%', '75%', '90%', '99%', '99.9%', 'stddev')
-        _print_percentiles('Parsing', dur['Parsing'])
-        _print_percentiles('Processing', dur['Processing'])
-        _print_percentiles('Send', dur['Send'])
-        _print_percentiles('Total', dur['Total'])
+        print Color.HEADER + '{:>10}{:>11}{:>12}{:>13}{:>14}{:>15}{:>16}{:>17}{:>18}'.format('Name', 'avg', '25%', '50%', '75%', '90%', '99%', '99.9%', 'stddev') + Color.ENDC
+        print _percentiles('Parsing', dur['Parsing'])
+        print _percentiles('Processing', dur['Processing'])
+        print _percentiles('Send', dur['Send'])
+        print Color.WARNING + _percentiles('Total', dur['Total']) + Color.ENDC
 
     def _parse_timings(self):
         '''Load timings log and parse it'''
@@ -99,7 +102,7 @@ class FizzBuzzServerBenchmark(unittest.TestCase):
 
     def _run_benchmark(self):
         '''Run process under test on simulation data and print timings'''
-        p = subprocess.Popen([FULL_BINARY_PATH, SIMULATION_FILENAME], cwd=self.workspace_dir, stdout=subprocess.PIPE)
+        p = subprocess.Popen(['taskset', '-c', '1', FULL_BINARY_PATH, SIMULATION_FILENAME], cwd=self.workspace_dir, stdout=subprocess.PIPE)
         out, _ = p.communicate()
         with open(os.path.join(self.workspace_dir, 'output.log'), 'w') as f:
             f.write(out)
@@ -120,7 +123,7 @@ class FizzBuzzServerBenchmark(unittest.TestCase):
 
     def test_bursts(self):
         # generate test data
-        NUM_REQUESTS = 100000
+        NUM_REQUESTS = 300000
 
         file = ''
         for i in range(NUM_REQUESTS):
