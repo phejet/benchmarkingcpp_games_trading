@@ -2,6 +2,7 @@
 
 import unittest
 import os
+import platform
 import subprocess
 import shutil
 import random
@@ -9,6 +10,8 @@ from operator import sub
 from math import sqrt
 
 IS_WINDOWS = os.name == 'nt'
+IS_LINUX = os.name == 'posix' and platform.system() != "Darwin"
+
 SYS_TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 BINARY_NAME = 'fizzbuzz_server'
 WORKSPACE_NAME = 'workspace'
@@ -104,7 +107,10 @@ class FizzBuzzServerBenchmark(unittest.TestCase):
     def _run_benchmark(self):
         '''Run process under test on simulation data and print timings'''
         os.chdir(self.workspace_dir)
-        os.system('taskset -c 1 %s %s > output.txt' % (FULL_BINARY_PATH, SIMULATION_FILENAME))
+        cmd = '%s %s > output.txt' % (FULL_BINARY_PATH, SIMULATION_FILENAME)
+        if IS_LINUX:
+            cmd = 'taskset -c 1 ' + cmd
+        os.system(cmd)
         print 'Parsing collected data'
         self._print_stats(self._parse_timings())
 
