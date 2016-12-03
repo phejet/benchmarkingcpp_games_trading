@@ -5,16 +5,12 @@ namespace Demo {
 
 TimeLog::TimeLog()
 {
-	mStartEpochNanos = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch());
-	mStartTSC = rdtsc();
-
 	mEntries.reserve(MAX_TIME_LOG_SIZE);
 }
 
-uint64_t TimeLog::ToEpoch(uint64_t tsc)
+uint64_t ToEpoch(Timestamp ts)
 {
-	uint64_t delta = tsc - mStartTSC;
-	return mStartEpochNanos.count() + delta;
+	return std::chrono::duration_cast<std::chrono::nanoseconds>(ts.time_since_epoch()).count();
 }
 
 void TimeLog::DumpLog()
@@ -25,8 +21,8 @@ void TimeLog::DumpLog()
 	for (auto& entry : mEntries)
 	{
 		fprintf(f, "Data: TimeLogEntry: request=%lu,startTS=%lu,finishParsingTS=%lu,finishProcessingTS=%lu,finishSendTS=%lu\n",
-			entry.request, ToEpoch(entry.start), ToEpoch(entry.finishParsingTSC),
-			ToEpoch(entry.finishProcessingTSC), ToEpoch(entry.finishSendTSS));
+			entry.request, ToEpoch(entry.startTS), ToEpoch(entry.finishParsingTS),
+			ToEpoch(entry.finishProcessingTS), ToEpoch(entry.finishSendTS));
 	}
 	fclose(f);
 }
