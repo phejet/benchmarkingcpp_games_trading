@@ -62,8 +62,6 @@ void Application::HandleRequest(const char* recvBuf, size_t recvSize, IConnectio
 	timeCapture.SetRequest(number);
 }
 
-
-
 void Application::SimulationRun(const char* simulationFile)
 {
 	std::vector<SimulatedNetworkPacket> packets;
@@ -83,6 +81,5 @@ void Application::SimulationRun(const char* simulationFile)
 
 	mSimServer.Run(packets, this);
 }
-
 
 }

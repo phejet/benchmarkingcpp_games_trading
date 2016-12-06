@@ -10,7 +10,8 @@ TimeLog::TimeLog()
 
 unsigned long long ToEpoch(Timestamp ts)
 {
-	return std::chrono::duration_cast<std::chrono::nanoseconds>(ts.time_since_epoch()).count();
+	return std::chrono::duration_cast<std::chrono::nanoseconds>(
+					ts.time_since_epoch()).count();
 }
 
 void TimeLog::DumpLog()

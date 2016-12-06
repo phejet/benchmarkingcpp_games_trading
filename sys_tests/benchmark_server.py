@@ -111,9 +111,9 @@ class FizzBuzzServerBenchmark(unittest.TestCase):
         if IS_LINUX:
             cmd = 'taskset -c 1 ' + cmd
         os.system(cmd)
-        print 'Parsing collected data'
+        print '\n' + self._testMethodName
         self._print_stats(self._parse_timings())
-
+ 
     def _configure_workspace(self):
         self.workspace_dir = os.path.join(SYS_TEST_DIR, WORKSPACE_NAME, *self.id().split('.')[1:])
         # clean previous workspace and create a new one
@@ -127,20 +127,29 @@ class FizzBuzzServerBenchmark(unittest.TestCase):
         self._configure_workspace()
         super(FizzBuzzServerBenchmark, self).setUp()
 
-    def test_bursts(self):
+    def test_bursts_large_numbers(self):
         # generate test data
         NUM_REQUESTS = 1000000
 
         file = ''
         for i in range(NUM_REQUESTS):
-            file += '%d %d\n' % (random.randint(1000, 1000000), random.randint(0, 100))
+            file += '%d %d\n' % (random.randint(1000, 1000000), 0)
         with open(os.path.join(self.workspace_dir, SIMULATION_FILENAME), 'w') as f:
             f.write(file)
 
         self._run_benchmark()
 
-    def test_one_by_one(self):
-        pass
+    def test_bursts_small_numbers(self):
+        # generate test data, small inputs
+        NUM_REQUESTS = 1000000
+
+        file = ''
+        for i in range(NUM_REQUESTS):
+            file += '%d %d\n' % (random.randint(1, 10), 0)
+        with open(os.path.join(self.workspace_dir, SIMULATION_FILENAME), 'w') as f:
+            f.write(file)
+
+        self._run_benchmark()
 
 if __name__ == '__main__':
     unittest.main()
