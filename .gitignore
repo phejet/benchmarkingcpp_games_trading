@@ -1,3 +1,5 @@
 build/
 .idea/
 sys_tests/workspace/
+*.pyc
+*.ipynb_checkpoints
