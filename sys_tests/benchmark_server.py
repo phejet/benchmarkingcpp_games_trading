@@ -5,8 +5,8 @@ import os
 import subprocess
 import shutil
 import random
-from operator import sub
 from math import sqrt
+from timelog_parser import parse_timings
 
 IS_WINDOWS = os.name == 'nt'
 SYS_TEST_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -44,14 +44,8 @@ class FizzBuzzServerBenchmark(unittest.TestCase):
             raise NotImplementedError()
 
     def _print_stats(self, entries):
-        dur = {}
-        # discard first 10 entries
-        dur['Parsing'] = sorted(map(sub, entries['finishParsingTS'], entries['startTS'])[10:])
-        dur['Processing'] = sorted(map(sub, entries['finishProcessingTS'], entries['finishParsingTS'])[10:])
-        dur['Send'] = sorted(map(sub, entries['finishSendTS'], entries['finishProcessingTS'])[10:])
-        dur['Total'] = sorted(map(sub, entries['finishSendTS'], entries['startTS'])[10:])
-
         def _print_percentiles(name, v):
+            v = sorted(v)
             l = len(v)
             mean = v[l / 2]
             sample_stddev = sqrt(sum([(x - mean) ** 2 for x in v]) / (l - 1))
@@ -59,43 +53,10 @@ class FizzBuzzServerBenchmark(unittest.TestCase):
                 name, v[int(l * 0.25)], v[int(l * 0.5)], v[int(l * 0.75)], v[int(l * 0.9)], v[int(l * 0.99)], v[int(l * 0.999)], '%.2f' % sample_stddev)
 
         print '{:>10}{:>11}{:>12}{:>13}{:>14}{:>15}{:>16}{:>17}'.format('Name', '25%', '50%', '75%', '90%', '99%', '99.9%', 'stddev')
-        _print_percentiles('Parsing', dur['Parsing'])
-        _print_percentiles('Processing', dur['Processing'])
-        _print_percentiles('Send', dur['Send'])
-        _print_percentiles('Total', dur['Total'])
-
-    def _parse_timings(self):
-        '''Load timings log and parse it'''
-        headers = {}
-        entries = {}
-        with open(os.path.join(self.workspace_dir, TIMINGS_LOG), 'r') as f:
-            for line in f.readlines():
-                if line.startswith('Header'):
-                    record_name, fields = line.split(':')[1:]
-                    record_name = record_name.strip()
-                    entries[record_name] = {}
-                    header = []
-                    for i, field in enumerate(fields.strip().split(',')):
-                        field_name, field_type = field.split('=')
-                        header.append((field_name, field_type))
-                        entries[record_name][field_name] = []
-                    headers[record_name] = header
-                elif line.startswith('Data'):
-                    record_name, fields = line.split(':')[1:]
-                    record_name = record_name.strip()
-                    assert record_name in headers
-                    fields = fields.split(',')
-                    header = headers[record_name]
-                    for i, field in enumerate(fields):
-                        field_value = field.split('=')[1]
-                        entries[record_name][header[i][0]].append(field_value.strip())
-        # convert types
-        for record_name, header in headers.iteritems():
-            for field_name, field_type in header:
-                if field_type in ['uint64', 'timestamp']:
-                    entries[record_name][field_name] = [int(val) for val in entries[record_name][field_name]]
-
-        return entries['TimeLogEntry']
+        _print_percentiles('Parsing', entries['Parsing'])
+        _print_percentiles('Processing', entries['Processing'])
+        _print_percentiles('Send', entries['Send'])
+        _print_percentiles('Total', entries['Total'])
 
     def _run_benchmark(self):
         '''Run process under test on simulation data and print timings'''
@@ -103,7 +64,8 @@ class FizzBuzzServerBenchmark(unittest.TestCase):
         out, _ = p.communicate()
         with open(os.path.join(self.workspace_dir, 'output.log'), 'w') as f:
             f.write(out)
-        self._print_stats(self._parse_timings())
+        parsed_timings = parse_timings(os.path.join(self.workspace_dir, TIMINGS_LOG))['TimeLogEntry']
+        self._print_stats(parsed_timings)
 
     def _configure_workspace(self):
         self.workspace_dir = os.path.join(SYS_TEST_DIR, WORKSPACE_NAME, *self.id().split('.')[1:])
