@@ -72,7 +72,8 @@ class FizzBuzzServerBenchmark(unittest.TestCase):
         if IS_LINUX:
             cmd = 'taskset -c 1 ' + cmd
         os.system(cmd)
-		print '\n' + self._testMethodName
+
+        print '\n' + self._testMethodName
         parsed_timings = parse_timings(os.path.join(self.workspace_dir, TIMINGS_LOG))['TimeLogEntry']
         self._print_stats(parsed_timings)
  
