@@ -8,13 +8,16 @@ namespace Demo {
 // can do some variadic magic to wrap it up and make it easier to define new fields with names
 // two std tuples with enums to access fields and some sugar syntax will do the trick
 
+
+typedef std::chrono::time_point<std::chrono::high_resolution_clock> Timestamp;
+
 struct TimeLogEntry
 {
 	uint64_t request = 0;
-	uint64_t start = 0;
-	uint64_t finishParsingTSC = 0;
-	uint64_t finishProcessingTSC = 0;
-	uint64_t finishSendTSS = 0;
+	Timestamp startTS;
+	Timestamp finishParsingTS;
+	Timestamp finishProcessingTS;
+	Timestamp finishSendTS;
 };
 
 class TimeLog
@@ -25,20 +28,10 @@ public:
 	void	DumpLog();
 
 private:
-	uint64_t ToEpoch(uint64_t tsc);
-
-	const size_t MAX_TIME_LOG_SIZE = 4096;
+	const size_t MAX_TIME_LOG_SIZE = 1000000;
 	friend class TimeCapture;
 	std::vector<TimeLogEntry> mEntries;
-	// some magic to convert captured TSC to UNIX epoch
-	std::chrono::nanoseconds mStartEpochNanos;
-	uint64_t mStartTSC;
 };
-
-static inline unsigned long long rdtsc(void)
-{
-	return __rdtsc();
-}
 
 class TimeCapture
 {
@@ -47,12 +40,13 @@ public:
 	{
 		timelog.mEntries.emplace_back();
 		mEntry = &timelog.mEntries.back();
-		mEntry->start = rdtsc();
+
+		mEntry->startTS = CaptureTS();
 	}
 
 	~TimeCapture()
 	{
-		// production version would use background thread logger
+		// advanced version would use a background thread logger
 		// data for logging will be passed up via lock free queue
 		// FB folly is a good candidate
 	}
@@ -63,19 +57,25 @@ public:
 	}
 	void CaptureFinishParsingTSC()
 	{
-		mEntry->finishParsingTSC = rdtsc();
+		mEntry->finishParsingTS = CaptureTS(); 
 	}
 	void CaptureFinishProcessingTSC()
 	{
-		mEntry->finishProcessingTSC = rdtsc();
+		mEntry->finishProcessingTS = CaptureTS();
 	}
 
 	void CaptureFinishSendTSC()
 	{
-		mEntry->finishSendTSS = rdtsc();
+		mEntry->finishSendTS = CaptureTS();
 	}
 
 private:
+	Timestamp CaptureTS()
+	{
+		return std::chrono::high_resolution_clock::now();
+	}
+
+
 	TimeLogEntry* mEntry = nullptr;
 };
 

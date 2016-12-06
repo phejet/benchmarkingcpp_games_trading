@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     if (argc < 2)
     {
 		printf("Usage:\n\t fizzbuzz_server simulation file\n");
-		printf("Please simulation data file on\n");
+		printf("Provive simulation data filename as a first parameter\n");
 		return 0;
     }
 

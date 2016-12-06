@@ -6,7 +6,9 @@ import os
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-WIN_PREFIX = 'python'
+IS_WINDOWS = os.name == 'nt'
+
+CMD_PREFIX = 'python'
 
 def parse_command_line():
     parser = argparse.ArgumentParser()
@@ -20,19 +22,26 @@ def parse_command_line():
 
 def benchmark():
     print 'Running system benchmark'
-    subprocess.call([WIN_PREFIX, os.path.join(ROOT_DIR, 'sys_tests', 'benchmark_server.py')])
+    subprocess.call([CMD_PREFIX, os.path.join(ROOT_DIR, 'sys_tests', 'benchmark_server.py')])
 
 def build(args):
     '''Generate CMake output and trigger build'''
-    build_dir = os.path.join(ROOT_DIR, 'build', args.type)
+    build_dir = os.path.join(ROOT_DIR, 'build')
+    if not IS_WINDOWS:
+        # single target build, add target prefix to the build path
+        build_dir = os.path.join(build_dir, args.type)
+
     if not os.path.exists(build_dir):
         os.makedirs(build_dir)
 
     print 'Running build %s' % args.type
     # generate cmake files
-    subprocess.Popen(['cmake', ROOT_DIR], cwd=build_dir, shell=True).wait()
+    subprocess.Popen(['cmake', ROOT_DIR], cwd=build_dir, shell=IS_WINDOWS).wait()
     # run build
-    subprocess.Popen(['cmake', '--build', '.', '--target', 'ALL_BUILD', '--config', args.type], cwd=build_dir, shell=True).wait()
+    build_target = []
+    if IS_WINDOWS:
+        build_target = ['--target', 'ALL_BUILD']
+    subprocess.Popen(['cmake', '--build', '.'] + build_target + ['--config', args.type], cwd=build_dir, shell=IS_WINDOWS).wait()
 
 def main():
     args = parse_command_line()

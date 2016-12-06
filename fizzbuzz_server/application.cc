@@ -1,7 +1,6 @@
 #include "application.h"
 #include <assert.h>
 #include <string>
-#include <random>
 #include <fstream>
 
 namespace Demo {
@@ -63,12 +62,10 @@ void Application::HandleRequest(const char* recvBuf, size_t recvSize, IConnectio
 	timeCapture.SetRequest(number);
 }
 
-
-
 void Application::SimulationRun(const char* simulationFile)
 {
 	std::vector<SimulatedNetworkPacket> packets;
-	packets.reserve(1024);
+	packets.reserve(1000000);
 
 	std::ifstream infile(simulationFile);
 	if (infile)
@@ -81,20 +78,8 @@ void Application::SimulationRun(const char* simulationFile)
 		}
 		infile.close();
 	}
-	/*
-	// simulate network load for testing purposes
-	std::vector<SimulatedNetworkPacket> packets;
-	std::mt19937 randomGen(42); // fix seed
-
-	std::uniform_int_distribution<> delayDis(0, 10);
-
-	for (size_t i = 1; i < 1000; i++)
-	{
-		packets.emplace_back(std::to_string(i), delayDis(randomGen));
-	}*/
 
 	mSimServer.Run(packets, this);
 }
-
 
 }
