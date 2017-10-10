@@ -7,19 +7,23 @@ namespace Demo {
 
 namespace {
 
-template <typename RetType>
-RetType ReadInt(const char* input, size_t len)
+int ReadInt(const char* input, size_t len)
 {
-	RetType n = 0;
-	while (len--)
-	{
-		assert(*input >= '0' && *input <= '9');
-		n = n * 10 + *input - '0';
-		input++;
-	}
-
-	return n;
+	return std::atoi(input);
 }
+// template <typename RetType>
+// RetType ReadInt(const char* input, size_t len)
+// {
+// 	RetType n = 0;
+// 	while (len--)
+// 	{
+// 		assert(*input >= '0' && *input <= '9');
+// 		n = n * 10 + *input - '0';
+// 		input++;
+// 	}
+
+// 	return n;
+// }
 
 std::string MakeFizzBuzz(uint64_t number)
 {
@@ -50,7 +54,7 @@ Application::~Application()
 void Application::HandleRequest(const char* recvBuf, size_t recvSize, IConnection* conn)
 {
 	TimeCapture timeCapture(mTimingLog);		// <--- START PROCESSING TS
-	uint64_t number = ReadInt<uint64_t>(recvBuf, recvSize);
+	uint64_t number = ReadInt(recvBuf, recvSize);
 	timeCapture.CaptureFinishParsingTSC();		// <--- FINISH PARSING TS
 
 	std::string output = MakeFizzBuzz(number);
