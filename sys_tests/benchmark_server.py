@@ -68,7 +68,8 @@ class FizzBuzzServerBenchmark(unittest.TestCase):
     def _run_benchmark(self):
         '''Run process under test on simulation data and print timings'''
         os.chdir(self.workspace_dir)
-        cmd = '%s %s > output.txt' % (FULL_BINARY_PATH, SIMULATION_FILENAME)
+        cmd = '%s %s' % (FULL_BINARY_PATH, SIMULATION_FILENAME)
+        print cmd
         if IS_LINUX:
             cmd = 'taskset -c 1 ' + cmd
         os.system(cmd)
@@ -92,7 +93,7 @@ class FizzBuzzServerBenchmark(unittest.TestCase):
 
     def test_bursts_large_numbers(self):
         # generate test data
-        NUM_REQUESTS = 1000000
+        NUM_REQUESTS = 10000
 
         file = ''
         for i in range(NUM_REQUESTS):
@@ -104,7 +105,7 @@ class FizzBuzzServerBenchmark(unittest.TestCase):
 
     def test_bursts_small_numbers(self):
         # generate test data, small inputs
-        NUM_REQUESTS = 1000000
+        NUM_REQUESTS = 10000
 
         file = ''
         for i in range(NUM_REQUESTS):

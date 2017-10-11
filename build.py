@@ -36,7 +36,7 @@ def build(args):
 
     print 'Running build %s' % args.type
     # generate cmake files
-    subprocess.Popen(['cmake', ROOT_DIR], cwd=build_dir, shell=IS_WINDOWS).wait()
+    subprocess.Popen(['cmake', '-DCMAKE_BUILD_TYPE=Release', ROOT_DIR], cwd=build_dir, shell=IS_WINDOWS).wait()
     # run build
     build_target = []
     if IS_WINDOWS:
