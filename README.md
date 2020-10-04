@@ -11,7 +11,12 @@ Attached Jupyter notebook with basic analysis
 
 To build
 
+```bash
+git clone --recursive https://github.com/phejet/benchmarkingcpp_games_trading.git
+cd benchmarkingcpp_games_trading
 mkdir build
 cd build
 cmake ../
 make
+```
+
